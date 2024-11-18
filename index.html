@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onde estou</title>
+    <link rel="stylesheet" href="./estilo.css">
+    <link rel="stylesheet" href="./Leaflet.Measure-master/src/leaflet.measure.css">
+    <link rel="stylesheet" href="./leaflet/leaflet.css">
+    <script src="./leaflet/leaflet.js"></script>
+    <script src="./Leaflet.Measure-master/src/leaflet.measure.js"></script>
+    <script src="./turf.min.js"></script>
+    <script src="./estados.js"></script>
+    <script src="./UFs_nomes.js" defer></script>
+    <script src="./Estados/AL_Municipios.js" defer></script>
+    <script src="./Estados/BA_Municipios.js"></script>
+    <script src="./Estados/RO_Municipios.js"></script>
+    <script src="./Estados/SE_Municipios.js"></script>
+    <script src="./BR-101_SE.js"></script>
+    <script src="./scrips.js" defer></script>
+</head>
+
+<body>
+    <div id="coods">
+        <label for="lat">LATITUDE:</label>
+        <input type="number" id="lat" min=-90 max=90 step="0.00000001">
+        <label for="long">LONGITUDE:</label>
+        <input type="number" id="long" step="any">
+        <span id="datahora"></span>
+        <button id="busca">BUSCA</button>
+        <button id="busca2">BUSCA2</button>
+    </div>
+    <div id="estado">
+        <p>
+            <span id="ufNome"></span>
+            <span id="muniNome"></span>
+        </p>
+    </div>
+    <div id="map"></div>
+    <span id='coordinate'></span>
+</body>
+</html>
