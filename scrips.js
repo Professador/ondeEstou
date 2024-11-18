@@ -51,7 +51,7 @@ async function pegaEstado(ponto) {
     //console.log(ufId);
 }
 async function pegaMuni(ponto, uf) {
-    console.log(ponto);
+    //console.log(ponto, mu[uf]);
     const pt = turf.point(ponto);
     const muni = await encontrarPoligono(mu[uf], pt);
     const ufId = Number.parseInt(muni.properties.codarea);
