@@ -2,12 +2,16 @@ git init
 git add . 
 git commit -m "commit 20241118 1734"
 git branch -M main 
-
+git remote add origin https://github.com/Professador/ondeEstou.git main
 git push -u origin main 
 
 meu github: aclr11
 
-git pull https://github.com/Professador/ondeEstou.git main
 
+
+
+//Para atualizar
+git add . 
 git commit -m "commit 20241118 1734"
-git push -u origin main
+git branch -M main 
+git push -u origin main 
