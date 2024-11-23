@@ -104,7 +104,7 @@ function encontrarPoligono(geojson, ponto) {
     // Se o ponto não estiver em nenhum polígono, retorna null
     return null;
 }
-
+var map = null;
 function plotaPonto(ponto, div, poligono) {
     let pt = [ponto[1], ponto[0]];
     var container = L.DomUtil.get('map');
@@ -128,8 +128,9 @@ function plotaPonto(ponto, div, poligono) {
         maxZoom: 17,
         attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
     });
-
-    var map = L.map(div).setView(pt, 13);
+    //console.log(map);
+    //if (map !== undefined && map !== null) { map.remove(); }
+    map = L.map(div).setView(pt, 13);
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
@@ -189,6 +190,7 @@ function plotaPonto(ponto, div, poligono) {
         //document.getElementById('datahora').innerText = new Date(position.timestamp).toLocaleString();
         const muniT = await pegaMuni(ponto, estado.properties.codarea);
         //console.log(muniT);
+        map.remove();
         plotaPonto(ponto, 'map', muniT);
     })
     var rodo1 = L.geoJson(br101_se, {
