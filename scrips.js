@@ -3,10 +3,6 @@ const long = document.getElementById('long');
 const btBusca = document.getElementById('busca');
 const btBusca2 = document.getElementById('busca2');
 
-btBusca2.addEventListener('click', async () => {
-    plotaPonto([-37.0728904, -11.0201202], 'map', mu[28]);
-})
-
 navigator.geolocation.getCurrentPosition(async function (position) {
     //console.log(position);
     let ponto = new Array();
@@ -54,6 +50,11 @@ async function pegaMuni(ponto, uf) {
     //console.log(ponto, mu[uf]);
     const pt = turf.point(ponto);
     const muni = await encontrarPoligono(mu[uf], pt);
+    //console.log(muni);
+    if(muni == 'Erro'){
+        document.getElementById('muniNome').innerText = 'Município não encontrado';
+        return;
+    }
     const ufId = Number.parseInt(muni.properties.codarea);
     
     const area = (turf.area(muni)/1000000).toFixed(3);
@@ -84,8 +85,8 @@ function encontrarPoligono(geojson, ponto) {
     // Verifica se o GeoJSON é válido e se o ponto é um objeto
     if (!geojson || !ponto || !ponto.geometry) {
         console.log('GeoJSON ou ponto inválidos');
-        return;
-    }
+        return "Erro";
+    };
 
     // Itera sobre cada feature (polígono) do GeoJSON
     for (let feature of geojson.features) {
