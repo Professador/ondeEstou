@@ -13,6 +13,11 @@ navigator.geolocation.getCurrentPosition(async function (position) {
     //console.log(estado);
     lat.value = ponto[1];
     long.value = ponto[0];
+    if(estado == 'Erro'){
+        document.getElementById('muniNome').innerText = "";
+        plotaPonto(ponto, 'map', null);
+        return;
+    }
     document.getElementById('datahora').innerText = new Date(position.timestamp).toLocaleString();
     const muniT = await pegaMuni(ponto, estado.properties.codarea);
     console.log(muniT);
@@ -24,11 +29,16 @@ btBusca.addEventListener('click', async (ev) => {
     let estado;
     if (typeof Number.parseFloat(long.value) != "number" || typeof Number.parseFloat(lat.value) != "number") {
         alert('Algo não é número: ' + typeof Number.parseFloat(long.value));
-        return
+        return;
     }
     ponto.push(Number.parseFloat(long.value));
     ponto.push(Number.parseFloat(lat.value));
     estado = await pegaEstado(ponto);
+    if(estado == 'Erro'){
+        document.getElementById('muniNome').innerText = "";
+        plotaPonto(ponto, 'map', null);
+        return;
+    }
     const muniT = await pegaMuni(ponto, await estado.properties.codarea);
     plotaPonto(ponto, 'map', muniT);
 });
@@ -42,7 +52,8 @@ async function pegaEstado(ponto) {
         //console.log(ufId);
         return ufId;
     } else {
-        document.getElementById('ufNome').innerText = `Ponto fora do Brasil: ${ponto[1]}, ${ponto[0]}`
+        document.getElementById('ufNome').innerText = `Ponto fora do Brasil: ${ponto[1]}, ${ponto[0]}`;
+        return "Erro";
     }
     //console.log(ufId);
 }
@@ -188,6 +199,11 @@ function plotaPonto(ponto, div, poligono) {
         //console.log(estado);
         lat.value = ponto[1];
         long.value = ponto[0];
+        if(estado == 'Erro'){
+            document.getElementById('muniNome').innerText = "";
+            plotaPonto(ponto, 'map', null);
+            return;
+        }
         //document.getElementById('datahora').innerText = new Date(position.timestamp).toLocaleString();
         const muniT = await pegaMuni(ponto, estado.properties.codarea);
         //console.log(muniT);
