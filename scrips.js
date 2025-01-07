@@ -2,6 +2,7 @@ const lat = document.getElementById('lat');
 const long = document.getElementById('long');
 const btBusca = document.getElementById('busca');
 const btBusca2 = document.getElementById('busca2');
+var map = null;
 
 navigator.geolocation.getCurrentPosition(async function (position) {
     //console.log(position);
@@ -39,7 +40,9 @@ btBusca.addEventListener('click', async (ev) => {
         plotaPonto(ponto, 'map', null);
         return;
     }
+    document.getElementById('datahora').innerText = new Date().toLocaleString();
     const muniT = await pegaMuni(ponto, await estado.properties.codarea);
+    map.remove();
     plotaPonto(ponto, 'map', muniT);
 });
 
@@ -116,7 +119,7 @@ function encontrarPoligono(geojson, ponto) {
     // Se o ponto não estiver em nenhum polígono, retorna null
     return null;
 }
-var map = null;
+
 function plotaPonto(ponto, div, poligono) {
     let pt = [ponto[1], ponto[0]];
     var container = L.DomUtil.get('map');
