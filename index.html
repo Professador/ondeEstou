@@ -45,22 +45,52 @@
 </head>
 
 <body>
-    <div id="coods">
-        <label for="lat">LATITUDE:</label>
-        <input type="number" id="lat" min=-90 max=90 step="0.00000001">
-        <label for="long">LONGITUDE:</label>
-        <input type="number" id="long" step="any">
-        <span id="datahora"></span>
-        <button id="busca">BUSCA</button>
+    <div id="conteiner">
+        <div class="tab-buttons">
+            <button class="tab-btn active" content-id="home">
+                Home
+            </button>
+            <button class="tab-btn" content-id="historico">
+                Histórico
+            </button>
+        </div>
+        <div class="tab-contents">
+            <div  class="content" id="home">
+                <div id="coods">
+                    <label for="lat">LATITUDE:</label>
+                    <input type="number" id="lat" min=-90 max=90 step="0.00000001">
+                    <label for="long">LONGITUDE:</label>
+                    <input type="number" id="long" step="any">
+                    <span id="datahora"></span>
+                    <button id="busca">BUSCA</button>
+                </div>
+                <div id="estado">
+                    <p>
+                        <span id="ufNome"></span>
+                        <span id="muniNome"></span>
+                    </p>
+                </div>
+                <div id="map"></div>
+                <span id='coordinate'></span>
+            </div>
+            <div class="content" id="historico">
+                <h2>HISTÓRICO</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>DATA HORA</th>
+                            <th>LATITUDE</th>
+                            <th>LONGITUDE</th>
+                            <th>UF</th>
+                            <th>MUNICÍPIO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tBPos"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div id="estado">
-        <p>
-            <span id="ufNome"></span>
-            <span id="muniNome"></span>
-        </p>
-    </div>
-    <div id="map"></div>
-    <span id='coordinate'></span>
     <div id="disclame">
         <p>
             Feito apenas com html, javascript e CSS, por <a href="https://github.com/Professador/ondeEstou"
@@ -69,7 +99,8 @@
         <p>
             Dados obtidos da <a target="_blank" href="https://servicodados.ibge.gov.br/api/docs">api do IBGE</a>
             , feito com as bibliotecas <a href="https://leafletjs.com/" target="”_blank”">LeafLet</a> e
-            <a href="https://turfjs.org/" target="_blank">Turf.js</a>, <a target="_blank" href="https://github.com/ptma/Leaflet.Measure">Leaflet.Measure</a>
+            <a href="https://turfjs.org/" target="_blank">Turf.js</a>, <a target="_blank"
+                href="https://github.com/ptma/Leaflet.Measure">Leaflet.Measure</a>
             bem como os mapas do <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetmap</a> e do <a
                 href="https://www.google.com/maps" target="_blank">Google Maps</a>
         </p>

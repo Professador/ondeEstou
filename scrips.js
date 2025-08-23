@@ -4,6 +4,61 @@ const btBusca = document.getElementById('busca');
 const btBusca2 = document.getElementById('busca2');
 var map = null;
 
+var db;
+const dbName = "historico";
+var request = indexedDB.open(dbName, 1);
+
+request.onsuccess = (event) => {
+    //console.log(request, event);
+    db = event.target.result;
+    //console.log(db);
+    //encheTbody('tBPos');
+}
+
+request.onerror = (event) => {
+    console.log("Erro no banco de dados: ", event.target);
+}
+
+request.onupgradeneeded = (event) => {
+    db = event.target.result;
+    var tabela1 = db.createObjectStore("posicoes", { keyPath: "id", autoIncrement: true });
+
+    tabela1.createIndex('datahora', 'datahora', { unique: true });
+    tabela1.createIndex('latitude', 'ponto'[0], { unique: false });
+    tabela1.createIndex('longitude', 'ponto'[1], { unique: false });
+    tabela1.createIndex('muniNome', 'muniNome', { unique: false });
+}
+
+async function getPosicao(id) {
+    return await DBPromise(
+        db.transaction(['posicoes'], 'readonly').objectStore('posicoes').get(parseInt(id))
+    );
+}
+async function delPosicao(id) {
+    return await DBPromise(
+        db.transaction(['posicoes'], 'readwrite').objectStore('posicoes').delete(parseInt(id))
+    );
+}
+
+async function putPosicao(posicao) {
+    return await DBPromise(
+        db.transaction(['posicoes'], 'readwrite').objectStore('posicoes').put(posicao)
+    );
+}
+
+function DBPromise(request) {
+    return new Promise((resolve, reject) => {
+        request.onsuccess = (e) => {
+            //console.log(e);
+            resolve(e.target.result);
+        }
+        request.onerror = (e) => {
+            reject(e.target.error);
+        }
+    });
+}
+
+
 navigator.geolocation.getCurrentPosition(async function (position) {
     //console.log(position);
     let ponto = new Array();
@@ -21,9 +76,19 @@ navigator.geolocation.getCurrentPosition(async function (position) {
     }
     document.getElementById('datahora').innerText = new Date(position.timestamp).toLocaleString();
     const muniT = await pegaMuni(ponto, estado.properties.codarea);
-    console.log(muniT);
+    //console.log(muniT);
     plotaPonto(ponto, 'map', muniT);
-
+    const posicao = {
+        datahora: new Date().toLocaleString('sv-SE'),
+        ponto: [ponto[1], ponto[0]],
+        ufId: muniT.properties.estado,
+        uf:  muniT.properties.uf,
+        ufNome:  muniT.properties.ufNome,
+        muniId:  muniT.properties.codarea,
+        muniNome:  muniT.properties.nome
+    };
+    //console.log(posicao);
+    putPosicao(posicao);
 });
 btBusca.addEventListener('click', async (ev) => {
     let ponto = new Array();
@@ -83,6 +148,7 @@ async function pegaMuni(ponto, uf) {
             muni.properties.nome = muniObj.nome;
             muni.properties.estado = muniObj.microrregiao.mesorregiao.UF.id;
             muni.properties.uf = muniObj.microrregiao.mesorregiao.UF.sigla;
+            muni.properties.ufNome = muniObj.microrregiao.mesorregiao.UF.nome;
         }
         //console.log(muni);
         document.getElementById('muniNome').innerText = `${ufId}-${muniObj.nome}-${area} Km2`
@@ -271,4 +337,77 @@ async function buscaMuni(idMuni) {
     catch (error) {
         return { error: error.message }
     }
+}
+
+const tabs = document.querySelectorAll('.tab-btn');
+
+tabs.forEach(tab => tab.addEventListener('click', () => tabClicked(tab)));
+
+const tabClicked = (tab) => {
+    //console.log(tabs[0])
+    tabs.forEach(tab => tab.classList.remove('active'));
+    tab.classList.add('active');
+
+    const contents = document.querySelectorAll('.content');
+    contents.forEach(content => content.classList.remove('show'));
+
+    const contentId = tab.getAttribute('content-id');
+    const content = document.getElementById(contentId);
+
+    if(contentId==="historico"){
+        encheTbody('tBPos');
+    }
+
+    content.classList.add('show');
+}
+
+const currentActiveTab = document.querySelector('.tab-btn.active');
+tabClicked(currentActiveTab);
+
+function encheTbody(tbody) {
+    const tb1 = document.getElementById(tbody);
+    tb1.innerHTML = "";
+    var tabPos = db.transaction('posicoes').objectStore('posicoes');
+     var hist = new Array();
+    tabPos.openCursor().onsuccess = (event) => {
+        var cursor = event.target.result;
+        //console.log(cursor.value);
+        var linha = ['id', 'datahora', 'ponto', 'ponto', 'uf', 'muniNome'];
+        //console.log( cursor.value['nome'], linha[1]);
+       
+        if (cursor) {
+            var pos = new Object();
+            pos = cursor.value;
+            hist.push(pos);
+            //console.log(cursor.value.nome);
+            let tr1 = document.createElement('tr');
+            for (let i1 = 0; i1 < linha.length; i1++) {
+                if (cursor.value.hasOwnProperty(linha[i1])) {
+                    let td1 = document.createElement('td');
+                    if(i1==2){
+                        td1.innerText = cursor.value[linha[i1]][0];
+                        //console.log(cursor.value[linha[i1]], typeof(cursor.value[linha[i1]]));
+                    }else{
+                        if(i1==3){
+                            td1.innerText = cursor.value[linha[i1]][1];
+                        }else{
+                            td1.innerText = cursor.value[linha[i1]]
+                        }
+                    }
+                    tr1.appendChild(td1);
+                    tr1.id = cursor.value.ssn;
+                    ///console.log(td1.innerText, i1, cursor.value[linha[i1]], Object.hasOwn(cursor.value, linha[i1]), linha[i1]);
+                }else{
+                    let td1 = document.createElement('td');
+                    td1.innerText = '';
+                    tr1.appendChild(td1);
+                    tr1.id = cursor.value.id;
+                }
+            }
+            tb1.appendChild(tr1);
+            cursor.continue();
+        }
+       
+    }
+     console.log(hist);
 }
