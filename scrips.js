@@ -6,7 +6,7 @@ var map = null;
 
 var db;
 const dbName = "historico";
-var request = indexedDB.open(dbName, 1);
+var request = indexedDB.open(dbName, 2);
 
 request.onsuccess = (event) => {
     //console.log(request, event);
@@ -22,11 +22,17 @@ request.onerror = (event) => {
 request.onupgradeneeded = (event) => {
     db = event.target.result;
     var tabela1 = db.createObjectStore("posicoes", { keyPath: "id", autoIncrement: true });
+    var tabela2 = db.createObjectStore("posicoesC", { keyPath: "id", autoIncrement: true });
 
     tabela1.createIndex('datahora', 'datahora', { unique: true });
     tabela1.createIndex('latitude', 'ponto'[0], { unique: false });
     tabela1.createIndex('longitude', 'ponto'[1], { unique: false });
     tabela1.createIndex('muniNome', 'muniNome', { unique: false });
+
+    tabela2.createIndex('datahora', 'datahora', { unique: true });
+    tabela2.createIndex('latitude', 'ponto'[0], { unique: false });
+    tabela2.createIndex('longitude', 'ponto'[1], { unique: false });
+    tabela2.createIndex('muniNome', 'muniNome', { unique: false });
 }
 
 async function getPosicao(id) {
@@ -40,9 +46,9 @@ async function delPosicao(id) {
     );
 }
 
-async function putPosicao(posicao) {
+async function putPosicao(posicao, tabela) {
     return await DBPromise(
-        db.transaction(['posicoes'], 'readwrite').objectStore('posicoes').put(posicao)
+        db.transaction([tabela], 'readwrite').objectStore(tabela).put(posicao)
     );
 }
 
@@ -63,13 +69,19 @@ navigator.geolocation.getCurrentPosition(async function (position) {
     //console.log(position);
     let ponto = new Array();
     let estado;
+    let resultado;
     ponto.push(position.coords.longitude);
     ponto.push(position.coords.latitude);
+    resultado = await toUtm(ponto);
+    console.log(resultado);
+    document.getElementById('coords3').textContent = `(${ponto[1]}, ${ponto[0]})`;
+    document.getElementById('fuso').textContent = `UTM ${resultado.fuso} ${resultado.e} m E, ${resultado.n} m N – SIRGAS2000`;
+    document.getElementById('utm').textContent = `( ${resultado.e}, ${resultado.n})`;
     estado = await pegaEstado(ponto);
-    //console.log(estado);
+    //console.log(ponto);
     lat.value = ponto[1];
     long.value = ponto[0];
-    if(estado == 'Erro'){
+    if (estado == 'Erro') {
         document.getElementById('muniNome').innerText = "";
         plotaPonto(ponto, 'map', null);
         return;
@@ -82,13 +94,13 @@ navigator.geolocation.getCurrentPosition(async function (position) {
         datahora: new Date().toLocaleString('sv-SE'),
         ponto: [ponto[1], ponto[0]],
         ufId: muniT.properties.estado,
-        uf:  muniT.properties.uf,
-        ufNome:  muniT.properties.ufNome,
-        muniId:  muniT.properties.codarea,
-        muniNome:  muniT.properties.nome
+        uf: muniT.properties.uf,
+        ufNome: muniT.properties.ufNome,
+        muniId: muniT.properties.codarea,
+        muniNome: muniT.properties.nome
     };
-    //console.log(posicao);
-    putPosicao(posicao);
+    //console.log('Posição: ', posicao);
+    putPosicao(posicao, 'posicoes');
 });
 btBusca.addEventListener('click', async (ev) => {
     let ponto = new Array();
@@ -100,7 +112,7 @@ btBusca.addEventListener('click', async (ev) => {
     ponto.push(Number.parseFloat(long.value));
     ponto.push(Number.parseFloat(lat.value));
     estado = await pegaEstado(ponto);
-    if(estado == 'Erro'){
+    if (estado == 'Erro') {
         document.getElementById('muniNome').innerText = "";
         plotaPonto(ponto, 'map', null);
         return;
@@ -109,6 +121,7 @@ btBusca.addEventListener('click', async (ev) => {
     const muniT = await pegaMuni(ponto, await estado.properties.codarea);
     map.remove();
     plotaPonto(ponto, 'map', muniT);
+    
 });
 
 async function pegaEstado(ponto) {
@@ -130,13 +143,13 @@ async function pegaMuni(ponto, uf) {
     const pt = turf.point(ponto);
     const muni = await encontrarPoligono(mu[uf], pt);
     //console.log(muni);
-    if(muni == 'Erro'){
+    if (muni == 'Erro') {
         document.getElementById('muniNome').innerText = 'Município não encontrado';
         return;
     }
     const ufId = Number.parseInt(muni.properties.codarea);
-    
-    const area = (turf.area(muni)/1000000).toFixed(3);
+
+    const area = (turf.area(muni) / 1000000).toFixed(3);
     //console.log(muni);
     if (ufId) {
         //const ufObj = ufNomes.find((elemento) => elemento.id==ufId);
@@ -252,7 +265,7 @@ function plotaPonto(ponto, div, poligono) {
     var measure = L.control.measure({}).addTo(map);
     var scale = L.control.scale({ imperial: false })
     scale.addTo(map);
-    
+
     map.on('mousemove', function (e) {
         document.getElementById('coordinate').innerText = 'Lat: ' + e.latlng.lat + ', Long: ' + e.latlng.lng;
         //console.log('lat: ' + e.latlng.lat, 'lng: ' + e.latlng.lng)
@@ -262,13 +275,19 @@ function plotaPonto(ponto, div, poligono) {
         container._leaflet_id = null;
         let ponto = new Array();
         let estado;
+        let resultado;
         ponto.push(ev.latlng.lng);
         ponto.push(ev.latlng.lat);
+        resultado = await toUtm(ponto);
+        //console.log(resultado);
+        document.getElementById('coords3').textContent = `(${ponto[1]}, ${ponto[0]})`;
+        document.getElementById('fuso').textContent = `UTM ${resultado.fuso} ${resultado.e} m E, ${resultado.n} m N – SIRGAS2000`;
+        document.getElementById('utm').textContent = `( ${resultado.e}, ${resultado.n})`;
         estado = await pegaEstado(ponto);
         //console.log(estado);
         lat.value = ponto[1];
         long.value = ponto[0];
-        if(estado == 'Erro'){
+        if (estado == 'Erro') {
             document.getElementById('muniNome').innerText = "";
             plotaPonto(ponto, 'map', null);
             return;
@@ -278,6 +297,17 @@ function plotaPonto(ponto, div, poligono) {
         //console.log(muniT);
         map.remove();
         plotaPonto(ponto, 'map', muniT);
+        const posicao = {
+        datahora: new Date().toLocaleString('sv-SE'),
+        ponto: [ponto[1], ponto[0]],
+        ufId: muniT.properties.estado,
+        uf: muniT.properties.uf,
+        ufNome: muniT.properties.ufNome,
+        muniId: muniT.properties.codarea,
+        muniNome: muniT.properties.nome
+    };
+    console.log(posicao);
+    putPosicao(posicao, 'posicoesC');
     })
     var rodo1 = L.geoJson(br101_se, {
         style: {
@@ -291,7 +321,7 @@ function plotaPonto(ponto, div, poligono) {
     console.log('dist ', distance);*/
     if (poligono) {
         var estado = poligono.properties.estado;
-        if(mu[estado]){
+        if (mu[estado]) {
             var poli2 = L.geoJson(mu[estado], {
                 style: {
                     color: 'black',
@@ -339,6 +369,23 @@ async function buscaMuni(idMuni) {
     }
 }
 
+async function toUtm(ponto) {
+    const url1 = `https://servicodados.ibge.gov.br/api/v1/progrid/latlongdec?referencialEntrada=sirgas2000&tipoCoordenadaSaida=utm_e_n&lat=${ponto[1]}&long=${ponto[0]}`;
+    console.log(url1);
+    try {
+        const response = await fetch(url1)
+        if (!response.ok) {
+            throw new Error('Erro na solicitação. Código do status: ' + response.status)
+        }
+        const data = await response.json();
+        //console.log(data.nome, typeof data);
+        return data.resultado
+    }
+    catch (error) {
+        return { error: error.message }
+    }
+}
+
 const tabs = document.querySelectorAll('.tab-btn');
 
 tabs.forEach(tab => tab.addEventListener('click', () => tabClicked(tab)));
@@ -354,8 +401,11 @@ const tabClicked = (tab) => {
     const contentId = tab.getAttribute('content-id');
     const content = document.getElementById(contentId);
 
-    if(contentId==="historico"){
-        encheTbody('tBPos');
+    if (contentId === "historico") {
+        encheTbody('tBPos', 'posicoes');
+    }
+    if (contentId === "historicoC") {
+        encheTbody('tBPosC', 'posicoesC');
     }
 
     content.classList.add('show');
@@ -364,17 +414,17 @@ const tabClicked = (tab) => {
 const currentActiveTab = document.querySelector('.tab-btn.active');
 tabClicked(currentActiveTab);
 
-function encheTbody(tbody) {
+function encheTbody(tbody, tabela) {
     const tb1 = document.getElementById(tbody);
     tb1.innerHTML = "";
-    var tabPos = db.transaction('posicoes').objectStore('posicoes');
-     var hist = new Array();
+    var tabPos = db.transaction(tabela).objectStore(tabela);
+    var hist = new Array();
     tabPos.openCursor().onsuccess = (event) => {
         var cursor = event.target.result;
         //console.log(cursor.value);
         var linha = ['id', 'datahora', 'ponto', 'ponto', 'uf', 'muniNome'];
         //console.log( cursor.value['nome'], linha[1]);
-       
+
         if (cursor) {
             var pos = new Object();
             pos = cursor.value;
@@ -384,20 +434,20 @@ function encheTbody(tbody) {
             for (let i1 = 0; i1 < linha.length; i1++) {
                 if (cursor.value.hasOwnProperty(linha[i1])) {
                     let td1 = document.createElement('td');
-                    if(i1==2){
+                    if (i1 == 2) {
                         td1.innerText = cursor.value[linha[i1]][0];
                         //console.log(cursor.value[linha[i1]], typeof(cursor.value[linha[i1]]));
-                    }else{
-                        if(i1==3){
+                    } else {
+                        if (i1 == 3) {
                             td1.innerText = cursor.value[linha[i1]][1];
-                        }else{
+                        } else {
                             td1.innerText = cursor.value[linha[i1]]
                         }
                     }
                     tr1.appendChild(td1);
                     tr1.id = cursor.value.ssn;
                     ///console.log(td1.innerText, i1, cursor.value[linha[i1]], Object.hasOwn(cursor.value, linha[i1]), linha[i1]);
-                }else{
+                } else {
                     let td1 = document.createElement('td');
                     td1.innerText = '';
                     tr1.appendChild(td1);
@@ -407,7 +457,7 @@ function encheTbody(tbody) {
             tb1.appendChild(tr1);
             cursor.continue();
         }
-       
+
     }
-     console.log(hist);
+    //console.log(hist);
 }

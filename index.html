@@ -53,6 +53,9 @@
             <button class="tab-btn" content-id="historico">
                 Histórico
             </button>
+            <button class="tab-btn" content-id="historicoC">
+                Histórico clicados
+            </button>
         </div>
         <div class="tab-contents">
             <div  class="content" id="home">
@@ -63,6 +66,11 @@
                     <input type="number" id="long" step="any">
                     <span id="datahora"></span>
                     <button id="busca">BUSCA</button>
+                </div>
+                <div id="coords2">
+                    <span id="coords3"></span>
+                    <span id="fuso"></span>
+                    <span id="utm"></span>
                 </div>
                 <div id="estado">
                     <p>
@@ -87,6 +95,22 @@
                         </tr>
                     </thead>
                     <tbody id="tBPos"></tbody>
+                </table>
+            </div>
+            <div class="content" id="historicoC">
+                <h2>HISTÓRICO DE LOCAIS CLICADOS</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>DATA HORA</th>
+                            <th>LATITUDE</th>
+                            <th>LONGITUDE</th>
+                            <th>UF</th>
+                            <th>MUNICÍPIO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tBPosC"></tbody>
                 </table>
             </div>
         </div>
