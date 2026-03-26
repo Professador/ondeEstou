@@ -4,35 +4,50 @@ const btBusca = document.getElementById('busca');
 const btBusca2 = document.getElementById('busca2');
 var map = null;
 
-var db;
 const dbName = "historico";
-var request = indexedDB.open(dbName, 2);
+const dbVersion = 3; // Aumente a versão sempre que mudar a estrutura
+var db;
+
+var request = indexedDB.open(dbName, dbVersion);
+
+request.onupgradeneeded = (event) => {
+    console.log("Upgradeneeded chamado - versão:", event.newVersion);
+    db = event.target.result;
+    
+    try {
+        // Criar "posicoes" se não existir
+        if (!db.objectStoreNames.contains("posicoes")) {
+            var tabela1 = db.createObjectStore("posicoes", { keyPath: "id", autoIncrement: true });
+            tabela1.createIndex('datahora', 'datahora', { unique: false }); // unique: false permite duplicatas
+            tabela1.createIndex('latitude', 'latitude', { unique: false });
+            tabela1.createIndex('longitude', 'longitude', { unique: false });
+            tabela1.createIndex('muniNome', 'muniNome', { unique: false });
+            console.log("✅ Tabela 'posicoes' criada!");
+        }
+        
+        // Criar "posicoesC" se não existir
+        if (!db.objectStoreNames.contains("posicoesC")) {
+            var tabela2 = db.createObjectStore("posicoesC", { keyPath: "id", autoIncrement: true });
+            tabela2.createIndex('datahora', 'datahora', { unique: false });
+            tabela2.createIndex('latitude', 'latitude', { unique: false });
+            tabela2.createIndex('longitude', 'longitude', { unique: false });
+            tabela2.createIndex('muniNome', 'muniNome', { unique: false });
+            console.log("✅ Tabela 'posicoesC' criada!");
+        }
+    } catch (error) {
+        console.error("❌ Erro ao criar tabelas:", error);
+    }
+}
 
 request.onsuccess = (event) => {
-    //console.log(request, event);
     db = event.target.result;
-    //console.log(db);
-    //encheTbody('tBPos');
+    console.log("✅ Banco de dados aberto com sucesso!");
+    console.log("Tabelas existentes:", Array.from(db.objectStoreNames));
+    // encheTbody('tBPos');
 }
 
 request.onerror = (event) => {
-    console.log("Erro no banco de dados: ", event.target);
-}
-
-request.onupgradeneeded = (event) => {
-    db = event.target.result;
-    var tabela1 = db.createObjectStore("posicoes", { keyPath: "id", autoIncrement: true });
-    var tabela2 = db.createObjectStore("posicoesC", { keyPath: "id", autoIncrement: true });
-
-    tabela1.createIndex('datahora', 'datahora', { unique: true });
-    tabela1.createIndex('latitude', 'ponto'[0], { unique: false });
-    tabela1.createIndex('longitude', 'ponto'[1], { unique: false });
-    tabela1.createIndex('muniNome', 'muniNome', { unique: false });
-
-    tabela2.createIndex('datahora', 'datahora', { unique: true });
-    tabela2.createIndex('latitude', 'ponto'[0], { unique: false });
-    tabela2.createIndex('longitude', 'ponto'[1], { unique: false });
-    tabela2.createIndex('muniNome', 'muniNome', { unique: false });
+    console.error("❌ Erro no banco de dados:", event.target.error);
 }
 
 async function getPosicao(id) {
