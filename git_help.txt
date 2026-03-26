@@ -1,3 +1,18 @@
+# No início do dia: sincronizar com o remote
+git pull origin main
+
+# Trabalhar no código...
+
+# Ao finalizar:
+git add .
+git commit -m "mensagem descritiva"
+git push  # Agora funciona direto, sem precisar de -u
+
+
+
+
+
+
 git init 
 git add . 
 git commit -m "commit 20241118 1734"
