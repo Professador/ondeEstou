@@ -15,3 +15,10 @@ git add .
 git commit -m "commit 20241118 1734"
 git branch -M main 
 git push -u origin main 
+
+
+# Configuração global (para todos os repositórios)
+git config --global user.name "Professador"
+git config --global user.email "professador@gmail.com"
+
+git config --global user.email "henrique@users.noreply.github.com"
