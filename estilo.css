@@ -75,7 +75,7 @@ body {
 
 /* ===== MAPA (AUMENTADO) ===== */
 #map {
-    height: 650px;
+    height: 800px;
     /* Aumentado de 500px para 650px */
     width: 100%;
     border: 2px solid #dee2e6;
