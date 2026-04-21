@@ -1,62 +1,368 @@
-#map{
-    height: 760px;
-    width: 90%;
+/* ===== ESTILOS GERAIS ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.content {
-    display: none;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 10px;
+    /* Reduzi padding externo */
 }
 
-.content.show {
-    display:block;
-    gap: 14px;
-    background-color: #c7d2fe;
-    border-radius: 0px 0px 8px 8px;
-    padding: 6px;
-}
-.tab-buttons {
+/* ===== TABS ===== */
+.tabs {
     display: flex;
-    gap: 6px;
-}
-.tab-btn {
-    width: 100%;
-    border: none;
-    color: #020617;
-    background-color: #f0f8ff;
-    border-radius: 8px 8px 0px 0px;
-    font-weight: 500;
-    padding: 8px;
-    cursor: pointer;
-    transition: background-color .3s ease;
+    background: #fff;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-.tab-btn.active {
-    background-color: #c7d2fe;
+.tab-btn {
+    flex: 1;
+    padding: 12px 20px;
+    /* Botões um pouco menores */
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: #495057;
+    transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-    background-color: #a5b4fc;
+    background: #e9ecef;
+    color: #007bff;
 }
+
+.tab-btn.active {
+    background: #007bff;
+    color: white;
+    border-bottom: 3px solid #0056b3;
+}
+
+/* ===== CONTEÚDO DAS ABAS ===== */
+.content {
+    display: none;
+    padding: 20px;
+    background: #fff;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 100px;
+}
+
+.content.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== MAPA (AUMENTADO) ===== */
+#map {
+    height: 650px;
+    /* Aumentado de 500px para 650px */
+    width: 100%;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+/* ===== CONTROLES (REDUZIDO E COMPACTO) ===== */
+.controls {
+    margin: 15px 0;
+    padding: 10px 15px;
+    /* Padding reduzido */
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    display: flex;
+    /* Flex para alinhar tudo na linha */
+    align-items: center;
+    gap: 10px;
+    /* Espaço entre elementos */
+    flex-wrap: wrap;
+}
+
+.controls label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.controls input {
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+    width: 140px;
+    /* Largura fixa menor */
+}
+
+.controls button {
+    padding: 6px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    margin-left: 5px;
+}
+
+#busca {
+    background: #007bff;
+    color: white;
+}
+
+#busca:hover {
+    background: #0056b3;
+}
+
+#btnLimparBusca {
+    background: #6c757d;
+    color: white;
+}
+
+#btnLimparBusca:hover {
+    background: #545b62;
+}
+
+/* ===== INFORMAÇÕES (LAYOUT COMPACTO) ===== */
+.info {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Removemos o H3 via CSS para não mexer no HTML se não quiser, 
+   mas o ideal é remover do HTML. Vou deixar display:none aqui por segurança */
+.info h3 {
+    display: none;
+}
+
+.info p {
+    margin: 4px 0;
+    /* Margem vertical reduzida */
+    color: #495057;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Grid para colocar 2 informações por linha */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Duas colunas iguais */
+    gap: 10px;
+}
+
+.info-item {
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.info-label {
+    font-weight: 700;
+    color: #007bff;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #212529;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.muni-nome {
+    font-weight: 700;
+    color: #090909;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+    display: inline;
+}
+
+#coordinate {
+    font-family: monospace;
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+/* ===== TABELAS ===== */
 table {
-    border: 1px solid blue;
+    width: 100%;
     border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+th,
+td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
 }
 
 th {
-    border: 1px solid red;
-    text-align: center;
-}
-td {
-    border: 1px solid green;
-    text-align: center;
-}
-tbody tr:hover{
-    background-color: orange;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+tbody tr[data-id] {
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
-thead tr:hover {
-    color: #000;
-    font-weight: bold;
-    background-color: aqua;
+tbody tr[data-id]:hover {
+    background: #e3f2fd;
+}
+
+/* ===== BOTÕES DE LIMPAR TABELAS ===== */
+.btn-limpar {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-limpar:hover {
+    background: #c82333;
+}
+
+/* ===== RODAPÉ ===== */
+footer {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+footer a {
+    color: #007bff;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 768px) {
+    #map {
+        height: 400px;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Uma coluna no mobile */
+    .controls input {
+        width: 100%;
+    }
+}
+
+/* ===== INDICADOR DE CARREGAMENTO ===== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    background: #fff;
+    padding: 30px 50px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 600;
+}
+
+.loading-subtext {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 8px;
 }

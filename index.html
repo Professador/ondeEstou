@@ -1,134 +1,177 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onde estou</title>
-    <link rel="stylesheet" href="./estilo.css">
-    <link rel="stylesheet" href="./Leaflet.Measure-master/src/leaflet.measure.css">
-    <link rel="stylesheet" href="./leaflet/leaflet.css">
-    <script src="./leaflet/leaflet.js"></script>
-    <script src="./Leaflet.Measure-master/src/leaflet.measure.js"></script>
-    <script src="./turf.min.js"></script>
-    <script src="./estados.js"></script>
-    <script src="./UFs_nomes.js" defer></script>
-    <script src="./Estados/AL_Municipios.js" defer></script>
-    <script src="./Estados/BA_Municipios.js"></script>
-    <script src="./Estados/RO_Municipios.js"></script>
-    <script src="./Estados/SE_Municipios.js"></script>
-    <script src="./Estados/PE_Municipios.js"></script>
-    <script src="./Estados/DF_53_Municipios.js"></script>
-    <script src="./Estados/GO_52_Municipios.js"></script>
-    <script src="./Estados/MT_51_Municipios.js"></script>
-    <script src="./Estados/MS_50_Municipios.js"></script>
-    <script src="./Estados/RS_43_Municipios.js"></script>
-    <script src="./Estados/SC_42_Municipios.js"></script>
-    <script src="./Estados/PR_41_Municipios.js"></script>
-    <script src="./Estados/SP_35_Municipios.js"></script>
-    <script src="./Estados/RJ_33_Municipios.js"></script>
-    <script src="./Estados/ES_32_Municipios.js"></script>
-    <script src="./Estados/MG_31_Municipios.js"></script>
-    <script src="./Estados/PB_25_Municipios.js"></script>
-    <script src="./Estados/RN_24_Municipios.js"></script>
-    <script src="./Estados/CE_23_Municipios.js"></script>
-    <script src="./Estados/PI_22_Municipios.js"></script>
-    <script src="./Estados/MA_21_Municipios.js"></script>
-    <script src="./Estados/TO_17_Municipios.js"></script>
-    <script src="./Estados/AP_16_Municipios.js"></script>
-    <script src="./Estados/PA_15_Municipios.js"></script>
-    <script src="./Estados/RR_14_Municipios.js"></script>
-    <script src="./Estados/AM_13_Municipios.js"></script>
-    <script src="./Estados/AC_12_Municipios.js"></script>
-    <script src="./BR-101_SE.js"></script>
-    <script src="./scrips.js" defer></script>
+    <title>Onde Estou - Geolocalização</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="estilo.css" />
 </head>
 
 <body>
-    <div id="conteiner">
-        <div class="tab-buttons">
-            <button class="tab-btn active" content-id="home">
-                Home
-            </button>
-            <button class="tab-btn" content-id="historico">
-                Histórico
-            </button>
-            <button class="tab-btn" content-id="historicoC">
-                Histórico clicados
-            </button>
+    <!-- INDICADOR DE CARREGAMENTO -->
+    <div id="loadingLocation" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">📍 Obtendo sua localização...</div>
+            <div class="loading-subtext">Por favor, aguarde</div>
         </div>
-        <div class="tab-contents">
-            <div  class="content" id="home">
-                <div id="coods">
-                    <label for="lat">LATITUDE:</label>
-                    <input type="number" id="lat" min=-90 max=90 step="0.00000001">
-                    <label for="long">LONGITUDE:</label>
-                    <input type="number" id="long" step="any">
-                    <span id="datahora"></span>
-                    <button id="busca">BUSCA</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" content-id="home">Home</button>
+        <button class="tab-btn" content-id="historico">Histórico</button>
+        <button class="tab-btn" content-id="historicoC">Histórico clicados</button>
+    </div>
+
+    <!-- Dentro da ABA HOME -->
+    <div id="home" class="content show">
+        <div id="map"></div>
+
+        <!-- INFORMAÇÕES EM GRID (2 COLUNAS) -->
+        <div class="info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Município: </span>
+                    <span id="muniNome" class="muni-nome">-</span>,
+                    <span id="ufNome" class="info-value">-</span>
                 </div>
-                <div id="coords2">
-                    <span id="coords3"></span>
-                    <span id="fuso"></span>
-                    <span id="utm"></span>
+                <div class="info-item">
+                    <span id="coords3" class="info-value">-</span>
+                    <span id="fuso" class="info-value">-</span> 
+                    <span id="utm" class="info-value" style="font-size:12px; color:#666;">-</span>
                 </div>
-                <div id="estado">
-                    <p>
-                        <span id="ufNome"></span>
-                        <span id="muniNome"></span>
-                    </p>
-                </div>
-                <div id="map"></div>
-                <span id='coordinate'></span>
             </div>
-            <div class="content" id="historico">
-                <h2>HISTÓRICO</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>DATA HORA</th>
-                            <th>LATITUDE</th>
-                            <th>LONGITUDE</th>
-                            <th>UF</th>
-                            <th>MUNICÍPIO</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tBPos"></tbody>
-                </table>
+            <div class="controls">
+                <label>LAT:</label>
+                <input type="text" id="lat" placeholder="0.00000">
+
+                <label>LONG:</label>
+                <input type="text" id="long" placeholder="0.00000">
+
+                <button id="busca">BUSCAR</button>
+                <button id="btnLimparBusca">LIMPAR</button>
             </div>
-            <div class="content" id="historicoC">
-                <h2>HISTÓRICO DE LOCAIS CLICADOS</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>DATA HORA</th>
-                            <th>LATITUDE</th>
-                            <th>LONGITUDE</th>
-                            <th>UF</th>
-                            <th>MUNICÍPIO</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tBPosC"></tbody>
-                </table>
+            <div  class="controls">
+                <p style="margin-top: 10px; text-align: right; font-size: 12px;">
+                    Mouse: <span id="coordinate">-</span>
+                </p>
             </div>
         </div>
     </div>
-    <div id="disclame">
-        <p>
-            Feito apenas com html, javascript e CSS, por <a href="https://github.com/Professador/ondeEstou"
-                target="_blank">&lt;&lt;&lt; professador@gmail.com&gt;&gt;&gt;</a>
-        </p>
-        <p>
-            Dados obtidos da <a target="_blank" href="https://servicodados.ibge.gov.br/api/docs">api do IBGE</a>
-            , feito com as bibliotecas <a href="https://leafletjs.com/" target="”_blank”">LeafLet</a> e
-            <a href="https://turfjs.org/" target="_blank">Turf.js</a>, <a target="_blank"
-                href="https://github.com/ptma/Leaflet.Measure">Leaflet.Measure</a>
-            bem como os mapas do <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetmap</a> e do <a
-                href="https://www.google.com/maps" target="_blank">Google Maps</a>
-        </p>
+
+    <!-- ABA HISTÓRICO -->
+    <div id="historico" class="content">
+        <h3>HISTÓRICO DE LOCALIZAÇÕES</h3>
+        <button id="btnLimparHistorico" class="btn-limpar">🗑️ Limpar Histórico</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>DATA HORA</th>
+                    <th>LATITUDE</th>
+                    <th>LONGITUDE</th>
+                    <th>UF</th>
+                    <th>MUNICÍPIO</th>
+                </tr>
+            </thead>
+            <tbody id="tBPos">
+                <tr>
+                    <td colspan="6">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+
+    <!-- ABA HISTÓRICO CLICADOS -->
+    <div id="historicoC" class="content">
+        <h3>HISTÓRICO DE LOCAIS CLICADOS</h3>
+        <button id="btnLimparHistoricoC" class="btn-limpar">🗑️ Limpar Histórico de Cliques</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>DATA HORA</th>
+                    <th>LATITUDE</th>
+                    <th>LONGITUDE</th>
+                    <th>UF</th>
+                    <th>MUNICÍPIO</th>
+                </tr>
+            </thead>
+            <tbody id="tBPosC">
+                <tr>
+                    <td colspan="6">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <p>Feito apenas com HTML, JavaScript e CSS, por <a
+                href="https://github.com/Professador/ondeEstou">professador@gmail.com</a></p>
+        <p>Dados obtidos da <a href="https://servicodados.ibge.gov.br/api/docs">API do IBGE</a>, feito com as
+            bibliotecas
+            <a href="https://leafletjs.com/">Leaflet</a> e <a href="https://turfjs.org/">Turf.js</a>,
+            bem como os mapas do <a href="https://www.openstreetmap.org/">OpenStreetMap</a> e do <a
+                href="https://www.google.com/maps">Google Maps</a>
+        </p>
+    </footer>
+
+    <!-- ===== SCRIPTS EXTERNOS (ORDEM CRÍTICA!) ===== -->
+
+    <!-- 1. Leaflet JS -->
+    <script src="leaflet/leaflet.js"></script>
+
+    <!-- 2. Turf.js -->
+    <script src="turf.min.js"></script>
+
+    <!-- 3. ===== DADOS GEOJSON ===== -->
+
+    <!-- Estados (UFs) -->
+    <script src="estados.js"></script>
+
+    <!-- Nomes dos Estados -->
+    <script src="UFs_nomes.js"></script>
+
+    <!-- Municípios por Estado (ajuste os nomes conforme seus arquivos) -->
+    <script src="Estados/AC_12_Municipios.js"></script>
+    <script src="Estados/AL_27_Municipios.js"></script>
+    <script src="Estados/AM_13_Municipios.js"></script>
+    <script src="Estados/AP_16_Municipios.js"></script>
+    <script src="Estados/BA_Municipios.js"></script>
+    <script src="Estados/CE_23_Municipios.js"></script>
+    <script src="Estados/DF_53_Municipios.js"></script>
+    <script src="Estados/ES_32_Municipios.js"></script>
+    <script src="Estados/GO_52_Municipios.js"></script>
+    <script src="Estados/MA_21_Municipios.js"></script>
+    <script src="Estados/MG_31_Municipios.js"></script>
+    <script src="Estados/MS_50_Municipios.js"></script>
+    <script src="Estados/MT_51_Municipios.js"></script>
+    <script src="Estados/PA_15_Municipios.js"></script>
+    <script src="Estados/PB_25_Municipios.js"></script>
+    <script src="Estados/PE_Municipios.js"></script>
+    <script src="Estados/PI_22_Municipios.js"></script>
+    <script src="Estados/PR_41_Municipios.js"></script>
+    <script src="Estados/RJ_33_Municipios.js"></script>
+    <script src="Estados/RN_24_Municipios.js"></script>
+    <script src="Estados/RO_Municipios.js"></script>
+    <script src="Estados/RR_14_Municipios.js"></script>
+    <script src="Estados/RS_43_Municipios.js"></script>
+    <script src="Estados/SC_42_Municipios.js"></script>
+    <script src="Estados/SE_Municipios.js"></script>
+    <script src="Estados/SP_35_Municipios.js"></script>
+    <script src="Estados/TO_17_Municipios.js"></script>
+
+    <!-- Rodovia BR-101 SE -->
+    <script src="BR-101_SE.js"></script>
+
+    <!-- 4. SCRIPT PRINCIPAL -->
+    <script src="script.js"></script>
 </body>
 
 </html>
